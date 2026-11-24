@@ -26,11 +26,34 @@ export const api = {
     return request<JobsResponse>(`/jobs${query ? `?${query}` : ''}`);
   },
   getJob: (id: number) => request<JobResponse>(`/jobs/${id}`),
-  createJob: (job: Omit<Job, 'id' | 'title_hi' | 'employer_hi' | 'location_hi' | 'salary_hi' | 'description_hi'>) =>
+  createJob: (job: Omit<Job, 'id'>) =>
     request<JobResponse>('/jobs', { method: 'POST', body: JSON.stringify(job) }),
-  updateJob: (id: number, job: Omit<Job, 'id' | 'title_hi' | 'employer_hi' | 'location_hi' | 'salary_hi' | 'description_hi'>) =>
-    request<JobResponse>(`/jobs/${id}`, { method: 'PUT', body: JSON.stringify(job) }),
-  deleteJob: (id: number) => request<{ message: string }>(`/jobs/${id}`, { method: 'DELETE' }),
-  getEmployerJobs: (name: string) =>
-    request<{ jobs: Job[]; employer: string }>(`/profile/${encodeURIComponent(name)}`),
+  updateJob: (id: number, job: Omit<Job, 'id'>, pin?: string) => {
+    const headers: Record<string, string> = pin ? { 'X-Employer-Pin': pin } : {};
+    return request<JobResponse>(`/jobs/${id}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ ...job, pin: pin || job.pin }),
+    });
+  },
+  deleteJob: (id: number, pin?: string) => {
+    const headers: Record<string, string> = pin ? { 'X-Employer-Pin': pin } : {};
+    return request<{ message: string }>(`/jobs/${id}`, {
+      method: 'DELETE',
+      headers,
+      body: pin ? JSON.stringify({ pin }) : undefined,
+    });
+  },
+  getEmployerJobs: (name: string, pin?: string) => {
+    const headers: Record<string, string> = pin ? { 'X-Employer-Pin': pin } : {};
+    return request<{ jobs: Job[]; employer: string; authenticated?: boolean }>(
+      `/profile/${encodeURIComponent(name)}`,
+      { headers }
+    );
+  },
+  verifyEmployer: (employer: string, pin: string) =>
+    request<{ authenticated: boolean; employer: string; jobsCount?: number; isNew?: boolean }>(
+      '/auth/verify-employer',
+      { method: 'POST', body: JSON.stringify({ employer, pin }) }
+    ),
 };

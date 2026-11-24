@@ -1,8 +1,6 @@
-# 🏆 Sahayak - Award Winning Blue Collar Job Platform
+# Sahayak - Local Job Matching Platform
 
-**🎉 Winner of Uthaan 2025 POC Coding Competition Award**
-
-Sahayak is a revolutionary multilingual job portal specifically designed for blue-collar workers in India. Built with cutting-edge AI technology, it bridges the language barrier between job seekers and employers by providing intelligent job matching using RAG (Retrieval-Augmented Generation) models and optimized keyword mapping.
+Sahayak is a multilingual job portal for local workers and employers in India. It helps bridge language barriers with Hindi and English job listings, voice search, and job matching.
 
 ## 🌟 Key Features
 
@@ -201,10 +199,6 @@ The platform uses a two-stage search process:
 - **Create Jobs**: Employers can post job listings with detailed descriptions
 - **Browse Jobs**: Intelligent filtering and categorization
 - **Profile Management**: User-specific job management and history
-
-## 🏆 Award Recognition
-
-**Uthaan 2025 POC Award Winner** - Recognized for innovative approach to solving blue-collar employment challenges in India through AI-powered multilingual job matching.
 
 ## 📊 Technical Highlights
 

@@ -14,6 +14,7 @@ export interface Job {
   phone: string;
   description: string;
   description_hi?: string;
+  pin?: string;
 }
 
 export interface JobsResponse {
@@ -27,4 +28,20 @@ export interface JobResponse {
 
 export interface ErrorResponse {
   error: string;
+}
+
+export interface ContactedJob {
+  jobId: number;
+  title: string;
+  employer: string;
+  phone: string;
+  location: string;
+  salary: string;
+  category: string;
+  contactedAt: string;
+}
+
+export interface EmployerSession {
+  employer: string;
+  pin: string;
 }
