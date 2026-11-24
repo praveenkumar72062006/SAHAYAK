@@ -5,6 +5,20 @@ import { api } from '@/lib/api';
 import { Job } from '@/types';
 import JobCard from '@/components/JobCard';
 
+type SpeechResultEvent = { results: ArrayLike<ArrayLike<{ transcript: string }>> };
+type SpeechRecognitionLike = {
+  lang: string;
+  interimResults: boolean;
+  onresult: ((event: SpeechResultEvent) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+};
+type SpeechWindow = Window & {
+  SpeechRecognition?: new () => SpeechRecognitionLike;
+  webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+};
+
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [search, setSearch] = useState('');
@@ -12,6 +26,7 @@ export default function Home() {
   const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [listening, setListening] = useState(false);
 
   useEffect(() => {
     fetchJobs();
@@ -34,6 +49,28 @@ export default function Home() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchJobs(search, category, location);
+  };
+
+  const handleVoiceSearch = () => {
+    const SpeechRecognition = (window as SpeechWindow).SpeechRecognition ?? (window as SpeechWindow).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setError('Voice search is not supported in this browser. Try Chrome or type your search.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'hi-IN';
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const spokenSearch = event.results[0]?.[0]?.transcript?.trim();
+      if (!spokenSearch) return;
+      setSearch(spokenSearch);
+      fetchJobs(spokenSearch, category, location);
+    };
+    recognition.onerror = () => setError('Voice search could not hear that. Please try again or type your search.');
+    recognition.onend = () => setListening(false);
+    setError(null);
+    setListening(true);
+    recognition.start();
   };
 
   return (
@@ -77,6 +114,9 @@ export default function Home() {
             <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="City or locality (e.g., Delhi)" aria-label="Filter by location" className="rounded-xl border border-gray-200 px-4 py-3" />
           </div>
         </form>
+        <button type="button" onClick={handleVoiceSearch} disabled={listening} className="mt-3 rounded-full border border-blue-200 bg-white px-5 py-2 font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-60" aria-label="Search for jobs by speaking in Hindi">
+          {listening ? '🎙 सुन रहा हूँ…' : '🎙 हिंदी में बोलकर खोजें'}
+        </button>
       </div>
 
       {/* Error Message */}
