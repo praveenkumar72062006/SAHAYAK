@@ -249,6 +249,3 @@ We welcome contributions to make Sahayak even better! Please feel free to:
 
 ---
 
-**Sahayak** - Empowering India's Blue Collar Workforce Through AI Innovation 🇮🇳
-
-_Built with ❤️ for the hardworking people of India_
