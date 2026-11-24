@@ -120,6 +120,7 @@ export default function ProfilePage() {
             {jobs.map((job) => (
               <div key={job.id} className="relative">
                 <JobCard job={job} />
+                <Link href={`/jobs/${job.id}/edit`} className="absolute bottom-3 right-3 z-10 rounded-lg bg-blue-700 px-3 py-1 text-sm font-semibold text-white shadow-md">✏️ Edit</Link>
                 <button
                   onClick={() => handleDelete(job.id)}
                   className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-700 shadow-md transition-all z-10"
