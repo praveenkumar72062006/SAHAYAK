@@ -8,6 +8,8 @@ import JobCard from '@/components/JobCard';
 export default function Home() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const [location, setLocation] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,11 +17,11 @@ export default function Home() {
     fetchJobs();
   }, []);
 
-  const fetchJobs = async (searchQuery?: string) => {
+  const fetchJobs = async (searchQuery?: string, categoryFilter?: string, locationFilter?: string) => {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.getJobs(searchQuery);
+      const data = await api.getJobs(searchQuery, categoryFilter, locationFilter);
       setJobs(data.jobs);
     } catch (err) {
       setError('Failed to fetch jobs. Please make sure the backend server is running.');
@@ -31,7 +33,7 @@ export default function Home() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchJobs(search);
+    fetchJobs(search, category, location);
   };
 
   return (
@@ -66,6 +68,13 @@ export default function Home() {
             >
               Search
             </button>
+          </div>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-700" aria-label="Filter by job category">
+              <option value="">All skill categories</option>
+              {['plumbing', 'painting', 'electrical', 'carpentry', 'gardening', 'driving', 'cooking', 'security', 'cleaning', 'construction'].map((item) => <option key={item} value={item}>{item[0].toUpperCase() + item.slice(1)}</option>)}
+            </select>
+            <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="City or locality (e.g., Delhi)" aria-label="Filter by location" className="rounded-xl border border-gray-200 px-4 py-3" />
           </div>
         </form>
       </div>

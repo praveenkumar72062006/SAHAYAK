@@ -61,27 +61,12 @@ class JobSearchModel:
         # Create query embedding
         query_embedding = self.model.encode(processed_search, convert_to_tensor=True)
         
-        # Calculate similarity scores
+        if not self.jobs:
+            return []
         cosine_scores = util.cos_sim(query_embedding, self.job_embeddings)[0]
-        k = min(Config.MAX_SEARCH_RESULTS, len(self.jobs))
-        top_results = torch.topk(cosine_scores, k=k)
-        
-        # Filter and return results
-        filtered_jobs = [self.jobs[idx] for idx in top_results.indices if idx < len(self.jobs)]
-        
-        # Debug information
-        print(f"\n🔎 Final Query for Model: {processed_search}")
-        for rank, (idx, score) in enumerate(zip(top_results.indices, top_results.values)):
-            if idx >= len(self.jobs):
-                continue
-            job = self.jobs[idx]
-            title = job.get("title", "No title")
-            category = job.get("category", "No category")
-            snippet = job.get("description", "")[:100]
-            print(f"{rank+1}. {title} ({category}) - Score: {score.item()*100:.2f}%\n   Desc: {snippet}...")
-        
-        return filtered_jobs
-    
+        ranked = sorted(enumerate(cosine_scores.tolist()), key=lambda item: item[1], reverse=True)
+        # Return relevant matches only; avoid padding the results with unrelated listings.
+        return [self.jobs[index] for index, score in ranked[:Config.MAX_SEARCH_RESULTS] if score >= 0.25]
     def get_job_by_id(self, job_id):
         """Get a specific job by ID"""
         return next((job for job in self.jobs if job["id"] == job_id), None)
@@ -89,7 +74,7 @@ class JobSearchModel:
     def add_job(self, job_data):
         """Add a new job and update embeddings"""
         new_job = {
-            "id": len(self.jobs) + 1,
+            "id": max((job["id"] for job in self.jobs), default=0) + 1,
             **job_data
         }
         self.jobs.append(new_job)
@@ -102,6 +87,15 @@ class JobSearchModel:
         
         return new_job
     
+    def update_job(self, job_id, job_data):
+        """Update a listing and refresh all search embeddings."""
+        job = self.get_job_by_id(job_id)
+        if not job:
+            return None
+        job.update(job_data)
+        self.save_jobs()
+        self.create_embeddings()
+        return job
     def delete_job(self, job_id):
         """Delete a job by ID"""
         original_length = len(self.jobs)
@@ -119,3 +113,5 @@ class JobSearchModel:
 
 # Global instance
 job_search_model = JobSearchModel()
+
+

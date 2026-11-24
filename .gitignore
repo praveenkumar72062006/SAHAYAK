@@ -285,3 +285,6 @@ frontend/.next/
 frontend/out/
 frontend/.vercel
 frontend/.env*.local
+# Keep the Next.js API client source tracked
+!frontend/lib/
+!frontend/lib/**
